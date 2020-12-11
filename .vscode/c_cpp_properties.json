@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/pjx/cleaner_ws/devel/include/**",
+                "/home/pjx/catkin_ws/devel/include/**",
+                "/home/pjx/catkin_ws_cartographer/install_isolated/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/pjx/catkin_ws/src/bysj/include/**",
+                "/home/pjx/catkin_ws/src/Ros_Qt5_Gui_App/include/**",
+                "/home/pjx/cleaner_ws/src/loam_velodyne/include/**",
+                "/home/pjx/cleaner_ws/src/lslidar_c16/lslidar_c16_decoder/include/**",
+                "/home/pjx/cleaner_ws/src/lslidar_c16/lslidar_c16_driver/include/**",
+                "/home/pjx/catkin_ws/src/mrobot_bringup/include/**",
+                "/home/pjx/cleaner_ws/src/pcl_seg/include/**",
+                "/home/pjx/class_ws/src/pcl_seg_d435i/include/**",
+                "/home/pjx/catkin_ws/src/qtros/include/**",
+                "/home/pjx/cleaner_ws/src/ros_joy/include/**",
+                "/home/pjx/catkin_ws/src/testpkg/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

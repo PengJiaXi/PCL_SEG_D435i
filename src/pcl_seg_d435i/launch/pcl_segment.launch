@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- Start darknet and ros wrapper -->
+  <node pkg="pcl_seg" type="PCL_segment_node" name="pcl_segment_node" output="screen" required="true">
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" />
+
+</launch>
