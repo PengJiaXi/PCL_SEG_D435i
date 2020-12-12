@@ -86,3 +86,6 @@ CATKIN_IGNORE
 *.exe
 *.out
 *.app
+
+############## librealsense #######################
+/src/realsense-ros/*
