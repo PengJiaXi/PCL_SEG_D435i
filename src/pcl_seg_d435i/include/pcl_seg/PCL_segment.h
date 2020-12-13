@@ -10,10 +10,13 @@
 #define PCL_SEGMENT_H
 
 #include <ros/ros.h>
-
+#include "pcl_seg/d435i.h"
 #include "pcl_seg/processPointClouds.h"
 
 using namespace lidar_obstacle_detection;
+
+//！相机模型类，切换相机时只需要更换模型类即可使用
+using CameraModel = D435i;
 
 namespace pcl_process {
 
@@ -28,13 +31,16 @@ private:
     ros::Publisher groundPublisher_;
     ros::Publisher obstaclePublisher_;
 
+    //！camera
+    CameraModel camera;
+
     //! 读取ros参数
     bool readParameters();
 
     //! 初始化任务
     void init();
 
-    void cityBlock(ProcessPointClouds<pcl::PointXYZI> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr &inputCloud);
+    void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud);
 };
 }
 #endif //PCL_SEGMENT_H

@@ -9,12 +9,12 @@
 #include <vector>
 
 struct Node {
-    pcl::PointXYZI point;
+    pcl::PointXYZ point;
     int id;
     Node *left;
     Node *right;
 
-    Node(pcl::PointXYZI arr, int setId) : point(arr), id(setId), left(NULL), right(NULL) {}
+    Node(pcl::PointXYZ arr, int setId) : point(arr), id(setId), left(NULL), right(NULL) {}
 };
 
 struct KdTree {
@@ -22,7 +22,7 @@ struct KdTree {
 
     KdTree() : root(NULL) {}
 
-    void insertHelper(Node **node, int depth, pcl::PointXYZI point, int id) {
+    void insertHelper(Node **node, int depth, pcl::PointXYZ point, int id) {
         // Tree is empty
         if (*node == NULL) {
             *node = new Node{point, id};
@@ -52,12 +52,12 @@ struct KdTree {
         }
     }
 
-    void insert(pcl::PointXYZI point, int id) {
+    void insert(pcl::PointXYZ point, int id) {
         // the function should create a new node and place correctly with in the root
         insertHelper(&root, 0, point, id);
     }
 
-    void searchHelper(pcl::PointXYZI target, Node *node, int depth, float distanceTol, std::vector<int> &ids) {
+    void searchHelper(pcl::PointXYZ target, Node *node, int depth, float distanceTol, std::vector<int> &ids) {
         if (node != NULL) {
             float delta_x = node->point.x - target.x;
             float delta_y = node->point.y - target.y;
@@ -102,7 +102,7 @@ struct KdTree {
         }
     }
     // return a list of point ids in the tree that are within distance of target
-    std::vector<int> search(pcl::PointXYZI target, float distanceTol)
+    std::vector<int> search(pcl::PointXYZ target, float distanceTol)
     {
         std::vector<int> ids;
         searchHelper(target, root, 0, distanceTol, ids);

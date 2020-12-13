@@ -13,6 +13,7 @@
 
 #include "pcl_seg/processPointClouds.h"
 #include "pcl_seg/PCL_segment.h"
+#include "pcl_seg/d435i.h"
 
 // using templates so also include .cpp to help linkern
 #include "processPointClouds.cpp"
@@ -22,7 +23,7 @@ using namespace lidar_obstacle_detection;
 namespace pcl_process
 {
 
-    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZI> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZI>::Ptr &inputCloud)
+    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud)
     {
         // ----------------------------------------------------
         // -----Open 3D viewer and display City Block     -----
@@ -46,11 +47,11 @@ namespace pcl_process
 
         // First:Filter cloud to reduce amount of points
         // 过滤点云，保留指定感兴趣立方体内的点，并去除自身车顶的点
-        pcl::PointCloud<pcl::PointXYZI>::Ptr filteredCloud = pointProcessorI->FilterCloud(inputCloud, filterRes, minpoint, maxpoint);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = pointProcessorI->FilterCloud(inputCloud, filterRes, minpoint, maxpoint);
 
         // Second: Segment the filtered cloud into obstacles and road
         // 执行Ransac，获得一对数据，first为地面外的点，second为地面内的点
-        std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
+        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
             filteredCloud, maxIterations, distanceThreshold);
 
         // 发布地面点云信息
@@ -70,12 +71,12 @@ namespace pcl_process
 
         // Third: Cluster different obstacle cloud
         // 获得每个聚类的点云序列
-        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->EuclideanClustering(segmentCloud.first,
+        std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessorI->EuclideanClustering(segmentCloud.first,
                                                                                                                clusterTolerance,
                                                                                                                minsize, maxsize);
         int clusterId = 0;
 
-        for (pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters)
+        for (pcl::PointCloud<pcl::PointXYZ>::Ptr cluster : cloudClusters)
         {
 
             std::cout << "cluster size";
@@ -126,25 +127,18 @@ namespace pcl_process
         obstaclePublisher_ =
             nodeHandle_.advertise<sensor_msgs::PointCloud2>(obstacleTopicName, obstacleQueueSize, obstacleLatch);
 
-        //声明一个XYZI类的点云处理对象
-        ProcessPointClouds<pcl::PointXYZI> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
+        //初始化相机
+        camera.init();
 
-        //获取PCD文件目录下的所有文件路径，排序并组成一个vector
-        std::vector<boost::filesystem::path> stream = pointProcessorI->streamPcd("/home/pjx/cleaner_ws/src/pcl_seg/data/pcd/data_1");
-        auto streamIterator = stream.begin();
-        pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloudI; //创建输入的点云对象
+        //声明一个XYZ类的点云处理对象
+        ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();
+        pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloudI; //创建输入的点云对象
 
         while (ros::ok())
         {
-            // Clear viewer
-            // Load pcd and run obstacle detection process
-            inputCloudI = pointProcessorI->loadPcd((*streamIterator).string());
+            inputCloudI = camera.getNextFrame();     //获取相机点云
             cityBlock(pointProcessorI, inputCloudI); //障碍物检测
-            streamIterator++;                        //下一个文件
-            if (streamIterator == stream.end())
-            {
-                streamIterator = stream.begin();
-            }
+
             ros::spinOnce();
         }
     }

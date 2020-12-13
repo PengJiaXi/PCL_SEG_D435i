@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_msgs
   pcl_ros
+  realsense2
 )
 
 
@@ -34,6 +35,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${realsense2_INCLUDE_DIR}
 )
 
 ## Declare a C++ library
@@ -42,6 +44,7 @@ add_library(${PROJECT_NAME}_lib
   src/processPointClouds.cpp
   src/cluster3d.cpp
   src/ransac3d.cpp
+  src/d435i.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -62,6 +65,8 @@ add_executable(PCL_segment_node src/PCL_segment_node.cpp)
 target_link_libraries(PCL_segment_node
   ${PROJECT_NAME}_lib
   ${catkin_LIBRARIES}
+  realsense2::realsense2 
+  realsense2::realsense-file
 )
 ## Add cmake target dependencies of the executable
 ## same as for the library above

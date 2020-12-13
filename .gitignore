@@ -87,5 +87,11 @@ CATKIN_IGNORE
 *.out
 *.app
 
+############## IDE ignore #########################
+/.vscode/*
+
 ############## librealsense #######################
 /src/realsense-ros/*
+
+############## ddynamic_reconfigure ###############
+/src/ddynamic_reconfigure/*
