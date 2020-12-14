@@ -13,6 +13,9 @@
 #include "pcl_seg/d435i.h"
 #include "pcl_seg/processPointClouds.h"
 
+
+
+
 using namespace lidar_obstacle_detection;
 
 //！相机模型类，切换相机时只需要更换模型类即可使用
@@ -39,7 +42,7 @@ private:
 
     //! 初始化任务
     void init();
-
+    void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud);
 };
 }
