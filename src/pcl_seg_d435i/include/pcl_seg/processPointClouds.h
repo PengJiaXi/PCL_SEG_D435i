@@ -40,17 +40,11 @@ public:
 
     void numPoints(PtCdtr<PointT> cloud);
 
-    PtCdtr<PointT>FilterCloud(PtCdtr<PointT> cloud, float filterRes, Eigen::Vector4f minPoint,Eigen::Vector4f maxPoint);
-
-    std::pair<PtCdtr<PointT>, PtCdtr<PointT>>SeparateClouds(pcl::PointIndices::Ptr inliers, PtCdtr<PointT> cloud);
+    PtCdtr<PointT>FilterCloud(PtCdtr<PointT> cloud, float voxelsize);
 
     std::pair<PtCdtr<PointT>, PtCdtr<PointT>>RansacSegmentPlane(PtCdtr<PointT> cloud, int maxIterations, float distanceTol);
 
-    std::pair<PtCdtr<PointT>, PtCdtr<PointT>>SegmentPlane(PtCdtr<PointT> cloud, int maxIterations, float distanceTol);
-
     std::vector<PtCdtr<PointT>>EuclideanClustering(PtCdtr<PointT> cloud, float clusterTolerance, int minSize,int maxSize);
-
-    std::vector<PtCdtr<PointT>>Clustering(PtCdtr<PointT> cloud, float clusterTolerance, int minSize, int maxSize);
 
     //Box BoundingBox(PtCdtr<PointT> cluster);
 

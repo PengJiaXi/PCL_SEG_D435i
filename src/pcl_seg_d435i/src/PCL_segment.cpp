@@ -31,23 +31,18 @@ namespace pcl_process
 
         // Setting hyper parameters
 
-        // FilterCloud
-        float filterRes = 0.4;
-
-        //Eigen是一个C++线性代数运算库
-        Eigen::Vector4f minpoint(-10, -6.5, -2, 1);
-        Eigen::Vector4f maxpoint(30, 6.5, 1, 1);
+        float voxelsize = 0.05;
         // SegmentPlane
         int maxIterations = 40;
-        float distanceThreshold = 0.3;
+        float distanceThreshold = 0.05;
         // Clustering
-        float clusterTolerance = 0.5;
+        float clusterTolerance = 0.05;
         int minsize = 10;
-        int maxsize = 140;
+        int maxsize = 10000;
 
         // First:Filter cloud to reduce amount of points
         // 过滤点云，保留指定感兴趣立方体内的点，并去除自身车顶的点
-        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = pointProcessorI->FilterCloud(inputCloud, filterRes, minpoint, maxpoint);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = pointProcessorI->FilterCloud(inputCloud, voxelsize);
 
         // Second: Segment the filtered cloud into obstacles and road
         // 执行Ransac，获得一对数据，first为地面外的点，second为地面内的点
