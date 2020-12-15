@@ -23,7 +23,7 @@ using namespace lidar_obstacle_detection;
 namespace pcl_process
 {
 
-    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud)
+    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3d pose_data)
     {
         // ----------------------------------------------------
         // -----Open 3D viewer and display City Block     -----
@@ -46,8 +46,10 @@ namespace pcl_process
 
         // Second: Segment the filtered cloud into obstacles and road
         // 执行Ransac，获得一对数据，first为地面外的点，second为地面内的点
-        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
-            filteredCloud, maxIterations, distanceThreshold);
+        // std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
+        //     filteredCloud, maxIterations, distanceThreshold);
+        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlaneWithPose(
+            filteredCloud, maxIterations, distanceThreshold, pose_data);
 
         // 发布地面点云信息
         sensor_msgs::PointCloud2 ground_point_cloud;
@@ -128,11 +130,18 @@ namespace pcl_process
         //声明一个XYZ类的点云处理对象
         ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();
         pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloudI; //创建输入的点云对象
-
+        Eigen::Vector3d eulerAngle;
         while (ros::ok())
         {
-            inputCloudI = camera.getNextFrame();     //获取相机点云
-            cityBlock(pointProcessorI, inputCloudI); //障碍物检测
+            //获取相机数据，包括点云指针和姿态角信息
+            camera.updateNextFrame();     
+            inputCloudI = camera.getPointClouds();
+            if(camera.getPose())
+                eulerAngle = camera.getPose()->matrix().eulerAngles(2,1,0);     //ZYX顺序(即RPY)的欧拉角
+
+            // 当相机帧数据中有点云信息和姿态角信息时才进行检测
+            if(inputCloudI && camera.getPose())
+                cityBlock(pointProcessorI, inputCloudI, eulerAngle); //障碍物检测
 
             ros::spinOnce();
         }

@@ -21,6 +21,7 @@
 
 #include "ransac3d.h"
 #include "cluster3d.h"
+#include "d435i.h"
 
 namespace lidar_obstacle_detection {
 
@@ -44,6 +45,8 @@ public:
 
     std::pair<PtCdtr<PointT>, PtCdtr<PointT>>RansacSegmentPlane(PtCdtr<PointT> cloud, int maxIterations, float distanceTol);
 
+    std::pair<PtCdtr<PointT>, PtCdtr<PointT>>RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int maxIterations, float distanceTol, Eigen::Vector3d pose_data);
+    
     std::vector<PtCdtr<PointT>>EuclideanClustering(PtCdtr<PointT> cloud, float clusterTolerance, int minSize,int maxSize);
 
     //Box BoundingBox(PtCdtr<PointT> cluster);

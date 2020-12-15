@@ -53,7 +53,41 @@ ProcessPointClouds<PointT>::RansacSegmentPlane(PtCdtr<PointT> cloud, int maxIter
         }
     }
     return std::pair<PtCdtr<PointT>, PtCdtr<PointT>>(out_plane, in_plane);
+}
 
+// 带有姿态角信息的平面约束Ransac
+template<typename PointT>
+std::pair<PtCdtr<PointT>, PtCdtr<PointT>>
+RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int maxIterations, float distanceTol, Eigen::Vector3d pose_data)
+{
+    // Count time
+    auto startTime = std::chrono::steady_clock::now();
+    srand(time(NULL));
+
+    int num_points = cloud->points.size();
+    auto cloud_points = cloud->points;
+    Ransac<PointT> RansacSeg(maxIterations, distanceTol, num_points);
+
+    // Get inliers from RANSAC implementation
+    // 随机抽样一致算法，找到最多的局内点，这些点符合某个平面，该平面就是地面
+    std::unordered_set<int> inliersResult = RansacSeg.Ransac3d(cloud);
+
+    auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "plane ransac-segment took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+    PtCdtr<PointT> out_plane(new pcl::PointCloud<PointT>());
+    PtCdtr<PointT> in_plane(new pcl::PointCloud<PointT>());
+
+    for (int i = 0; i < num_points; i++) {
+        PointT pt = cloud_points[i];
+        if (inliersResult.count(i)) {
+            in_plane->points.push_back(pt);        //in_plane记录在平面内的点
+        } else {
+            out_plane->points.push_back(pt);         //out_plane记录在平面外的点
+        }
+    }
+    return std::pair<PtCdtr<PointT>, PtCdtr<PointT>>(out_plane, in_plane);
 }
 
 
