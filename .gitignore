@@ -93,5 +93,6 @@ CATKIN_IGNORE
 ############## ddynamic_reconfigure ###############
 /src/ddynamic_reconfigure/*
 
-############## git conflict work space ###################
+############## git work space ###################
 /git_conflict/*
+.vscode

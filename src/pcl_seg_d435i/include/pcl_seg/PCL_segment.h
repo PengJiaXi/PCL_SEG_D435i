@@ -12,6 +12,7 @@
 #include <ros/ros.h>
 #include "pcl_seg/d435i.h"
 #include "pcl_seg/processPointClouds.h"
+#include <pcl/visualization/cloud_viewer.h>
 
 using namespace lidar_obstacle_detection;
 
@@ -36,12 +37,19 @@ namespace pcl_process
         //！camera
         CameraModel camera;
 
+        //创建输入的点云对象
+        pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloudI;
+        //pcl viewer
+        pcl::visualization::PCLVisualizer::Ptr viewer;
+        pcl::visualization::PCLVisualizer::Ptr viewer2;
+
         //! 读取ros参数
         bool readParameters();
 
         //! 初始化任务
         void init();
-
+        void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int clusterId, pcl::visualization::PCLVisualizer::Ptr &viewer);
+        // void ros_Box(ros::NodeHandle nh,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId);
         void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3d pose_data);
     };
 } // namespace pcl_process
