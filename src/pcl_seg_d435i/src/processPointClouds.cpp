@@ -1,5 +1,4 @@
 // PCL lib Functions for processing point clouds 
-
 #include "pcl_seg/processPointClouds.h"
 
 // using templates so also include .cpp to help linker
@@ -58,8 +57,9 @@ ProcessPointClouds<PointT>::RansacSegmentPlane(PtCdtr<PointT> cloud, int maxIter
 // 带有姿态角信息的平面约束Ransac
 template<typename PointT>
 std::pair<PtCdtr<PointT>, PtCdtr<PointT>>
-RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int maxIterations, float distanceTol, Eigen::Vector3d pose_data)
+ProcessPointClouds<PointT>::RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int maxIterations, float distanceTol, Eigen::Vector3f pose_data)
 {
+    // TODO:
     // Count time
     auto startTime = std::chrono::steady_clock::now();
     srand(time(NULL));
@@ -97,7 +97,6 @@ PtCdtr<PointT> ProcessPointClouds<PointT>::FilterCloud(PtCdtr<PointT> cloud, flo
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
 
-    // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
     // Create the filtering object: downsample the dataset using a leaf size of .2m
     //体素网格滤波器降采样，在每个体素网格内只留一个点
     pcl::VoxelGrid<PointT> vg;

@@ -308,7 +308,7 @@ namespace pcl_process
         viewer2->spinOnce();
     }
 
-    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3d pose_data)
+    void PointCloudSegment::cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3f pose_data)
     {
         // ----------------------------------------------------
         // -----Open 3D viewer and display City Block     -----
@@ -333,8 +333,8 @@ namespace pcl_process
         // 执行Ransac，获得一对数据，first为地面外的点，second为地面内的点
         // std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
         //     filteredCloud, maxIterations, distanceThreshold);
-        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlaneWithPose(
-            filteredCloud, maxIterations, distanceThreshold, pose_data);
+        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = 
+            pointProcessorI->RansacSegmentPlaneWithPose(filteredCloud, maxIterations, distanceThreshold, pose_data);
 
         // 发布地面点云信息
         sensor_msgs::PointCloud2 ground_point_cloud;
@@ -427,7 +427,7 @@ namespace pcl_process
         //声明一个XYZ类的点云处理对象
         ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();
 
-        Eigen::Vector3d eulerAngle;
+        Eigen::Vector3f eulerAngle;
         while (ros::ok())
         {
             //获取相机数据，包括点云指针和姿态角信息
