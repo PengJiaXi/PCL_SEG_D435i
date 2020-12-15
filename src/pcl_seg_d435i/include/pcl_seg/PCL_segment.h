@@ -12,7 +12,7 @@
 #include <ros/ros.h>
 #include "pcl_seg/d435i.h"
 #include "pcl_seg/processPointClouds.h"
-
+#include <pcl/visualization/cloud_viewer.h>
 
 
 
@@ -42,8 +42,9 @@ private:
 
     //! 初始化任务
     void init();
-    void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-    void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud);
+    void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId,pcl::visualization::PCLVisualizer::Ptr &viewer);
+   // void ros_Box(ros::NodeHandle nh,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId);
+    void cityBlock(ros::NodeHandle nh,ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud);
 };
 }
 #endif //PCL_SEGMENT_H
