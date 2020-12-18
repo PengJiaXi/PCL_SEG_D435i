@@ -12,6 +12,7 @@ void D435i::updateNextFrame() try
     // Cast the frame to pose_frame and get its data 
     if (f)
     {
+        std::cout << "get pose frame" << std::endl;
         auto pose_data = f.as<rs2::pose_frame>().get_pose_data();
         quaternion->w() = pose_data.rotation.w;
         quaternion->x() = pose_data.rotation.x;
@@ -24,9 +25,9 @@ void D435i::updateNextFrame() try
     pclptr = NULL;
     if (color)
     {
+        std::cout << "get RGBD frame" << std::endl;
         // Tell pointcloud object to map to this color frame
         pc.map_to(color);
-
         auto depth = frames.get_depth_frame();
         // Generate the pointcloud and texture mappings
         points = pc.calculate(depth);
@@ -42,12 +43,18 @@ catch (const std::exception &e)
     std::cerr << e.what() << std::endl;
 }
 
-void D435i::init()
+void D435i::init() try
 {
     // 设置接收IMU信息和POSE
-    cfg.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+    cfg.enable_all_streams();
     // Start streaming with configuration
     pipe.start(cfg);
+    std::cout << "D435i init" << std::endl;
+}
+catch (const rs2::error &e)
+{
+    std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
+    exit(-1);
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr D435i::getPointClouds()
