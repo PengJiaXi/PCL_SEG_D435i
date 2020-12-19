@@ -426,20 +426,19 @@ namespace pcl_process
 
         //声明一个XYZ类的点云处理对象
         ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();
-
-        Eigen::Vector3f eulerAngle;
+        rotation_estimator* temp;
+        Eigen::Vector3f eulerAngle(0,0,0);
         while (ros::ok())
         {
             //获取相机数据，包括点云指针和姿态角信息
-            camera.updateNextFrame();
-            inputCloudI = camera.getPointClouds();
-            if (camera.getPose())
-                eulerAngle = camera.getPose()->matrix().eulerAngles(2, 1, 0); //ZYX顺序(即RPY)的欧拉角
-
+            //camera.updateNextFrame();
+            //inputCloudI = camera.getPointClouds();
+            if(1)//if ()
+                eulerAngle = camera.getPose(); //ZYX顺序(即RPY)的欧拉角
+                //std::cout<<"x:"<<eulerAngle[2]<<std::endl;
             // 当相机帧数据中有点云信息和姿态角信息时才进行检测
-            if (inputCloudI && camera.getPose())
+            if (inputCloudI)//inputCloudI&&temp->check_imu_is_supported()
                 cityBlock(pointProcessorI, inputCloudI, eulerAngle); //障碍物检测
-
             ros::spinOnce();
         }
     }
