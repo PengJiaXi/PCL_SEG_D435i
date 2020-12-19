@@ -12,4 +12,4 @@ V1.1-P 添加了D435i的姿态信息获取，但暂未使用
 
 V1.2-P 合并了V1.1和V1.0的更改，解决了部分冲突。注意：尽量不要使用全局变量，PCL_segment.cpp中的全局变量已经作为类变量放进了h文件  
 
-V1.2-G beta 添加了imu参数的获取及通过加速度或角加速度计算欧拉角。但在计算欧拉角若干次后会自动终止，并且同时获取imu和图像信息时 wait_for_frames不能被调用。
+V1.2-G beta 添加了imu参数的获取及通过加速度或角加速度计算欧拉角。但在计算欧拉角若干次后会自动终止，并且同时获取imu和图像信息时 wait_for_frames不能被调用(参考https://github.com/IntelRealSense/librealsense/issues/7858)。
