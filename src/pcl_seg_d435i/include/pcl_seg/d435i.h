@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include "example.h"  
 
 class D435i
 {
@@ -15,7 +16,8 @@ public:
     void init();
     //输出数据
     pcl::PointCloud<pcl::PointXYZ>::Ptr getPointClouds();
-    Eigen::Quaternion<float>* getPose();
+    Eigen::Vector3f getPose();
+    bool poseflag=0;
 
 private:
     // Declare pointcloud object, for calculating pointclouds and texture mappings
@@ -26,10 +28,29 @@ private:
     rs2::pipeline pipe;
     // Create a configuration for configuring the pipeline with a non default profile
     rs2::config cfg;
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclptr;     //点云
-    Eigen::Quaternion<float>* quaternion;   // Eigen四元数姿态角
+    Eigen::Vector3f euleragl;   // Eigen四元数姿态角
+
 
     //将点云转换为pcl格式
     pcl::PointCloud<pcl::PointXYZ>::Ptr trans2pcl();
+};
+
+class rotation_estimator
+{
+    // theta is the angle of camera rotation in x, y and z components
+    float3 theta;
+    /* alpha indicates the part that gyro and accelerometer take in computation of theta; higher alpha gives more weight to gyro, but too high
+    values cause drift; lower alpha gives more weight to accelerometer, which is more sensitive to disturbances */
+    float alpha = 0.98;
+    bool firstGyro = true;
+    bool firstAccel = true;
+    // Keeps the arrival time of previous gyro frame
+    double last_ts_gyro = 0;
+public:
+    // Function to calculate the change in angle of motion based on data from gyro
+    void process_gyro(rs2_vector gyro_data, double ts);
+    float3 process_accel(rs2_vector accel_data);
+    bool check_imu_is_supported();
+
 };
