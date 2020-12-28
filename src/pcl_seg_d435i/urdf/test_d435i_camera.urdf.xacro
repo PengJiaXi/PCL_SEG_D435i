@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<robot name="realsense2_camera" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="use_nominal_extrinsics" default="false" />
+  <xacro:include filename="$(find pcl_seg_d435i)/urdf/_d435i.urdf.xacro"/>
+
+  <link name="base_link" />
+
+  <!--construct a virtual link to publish cloud data-->
+  <link name="clouds_link_virtual"/>
+  <joint name="clouds_base_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+    <parent link="base_link"/>
+    <child link="clouds_link_virtual"/>
+  </joint>
+
+  <xacro:sensor_d435i parent="base_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d435i>
+</robot>
+

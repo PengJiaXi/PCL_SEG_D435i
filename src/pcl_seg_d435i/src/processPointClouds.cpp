@@ -59,7 +59,6 @@ template<typename PointT>
 std::pair<PtCdtr<PointT>, PtCdtr<PointT>>
 ProcessPointClouds<PointT>::RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int maxIterations, float distanceTol, Eigen::Vector3f pose_data)
 {
-    // TODO:
     // Count time
     auto startTime = std::chrono::steady_clock::now();
     srand(time(NULL));
@@ -70,7 +69,7 @@ ProcessPointClouds<PointT>::RansacSegmentPlaneWithPose(PtCdtr<PointT> cloud, int
 
     // Get inliers from RANSAC implementation
     // 随机抽样一致算法，找到最多的局内点，这些点符合某个平面，该平面就是地面
-    std::unordered_set<int> inliersResult = RansacSeg.Ransac3d(cloud);
+    std::unordered_set<int> inliersResult = RansacSeg.Ransac3d(cloud,pose_data);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
