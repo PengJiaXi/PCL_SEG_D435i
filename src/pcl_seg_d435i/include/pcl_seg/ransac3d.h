@@ -27,6 +27,7 @@ namespace lidar_obstacle_detection {
         ~Ransac();
 
         std::unordered_set<int> Ransac3d(PtCdtr<PointT> cloud);
+        std::unordered_set<int> Ransac3d(PtCdtr<PointT> cloud, Eigen::Vector3f pose);
     };
 }
 #endif //PLAYBACK_RANSAC3D_H

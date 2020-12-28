@@ -2,10 +2,6 @@
 
 <launch>
 
-  <!-- Start darknet and ros wrapper -->
-  <node pkg="pcl_seg_d435i" type="PCL_segment_node" name="pcl_segment_node" output="screen" required="true">
-  </node>
-
-  <node pkg="rviz" type="rviz" name="rviz" />
+  <node pkg="pcl_seg_d435i" type="PCL_segment_node" name="pcl_segment_node" output="screen" required="true"/>
 
 </launch>

@@ -10,14 +10,21 @@
 class D435i
 {
 public:
+    // 相机数据是否更新
+    bool isUpdated;
     //获取下一帧信息
     void updateNextFrame();
     //初始化相机
     void init();
+    
     //输出数据
     pcl::PointCloud<pcl::PointXYZ>::Ptr getPointClouds();
     Eigen::Vector3f getPose();
-    bool poseflag=0;
+
+    //静态成员函数，用作回调
+    static void static_pipeCb(rs2::frame);
+    //静态类指针
+    static D435i* static_class_ptr;
 
 private:
     // Declare pointcloud object, for calculating pointclouds and texture mappings
@@ -29,11 +36,12 @@ private:
     // Create a configuration for configuring the pipeline with a non default profile
     rs2::config cfg;
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclptr;     //点云
-    Eigen::Vector3f euleragl;   // Eigen四元数姿态角
+    Eigen::Vector3f accelVector;   // 线性加速度向量
 
-
+    // 真正处理回调任务的成员函数
+    void _pipeCallback(rs2::frame);
     //将点云转换为pcl格式
-    pcl::PointCloud<pcl::PointXYZ>::Ptr trans2pcl();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _trans2pcl();
 };
 
 class rotation_estimator

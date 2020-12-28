@@ -12,6 +12,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Imu.h>
 
 #include "pcl_seg/processPointClouds.h"
 #include "pcl_seg/PCL_segment.h"
@@ -256,10 +257,10 @@ namespace pcl_process
         whd = whd1;
         float sc1 = (whd1(0) + whd1(1) + whd1(2)) / 3; //点云平均尺度，用于设置主方向箭头大小
 
-        std::cout << "width1=" << whd1(0) << std::endl;
-        std::cout << "heght1=" << whd1(1) << std::endl;
-        std::cout << "depth1=" << whd1(2) << std::endl;
-        std::cout << "scale1=" << sc1 << std::endl;
+        // std::cout << "width1=" << whd1(0) << std::endl;
+        // std::cout << "heght1=" << whd1(1) << std::endl;
+        // std::cout << "depth1=" << whd1(2) << std::endl;
+        // std::cout << "scale1=" << sc1 << std::endl;
 
         const Eigen::Quaternionf bboxQ1(Eigen::Quaternionf::Identity());
         const Eigen::Vector3f bboxT1(c1);
@@ -318,8 +319,8 @@ namespace pcl_process
 
         float voxelsize = 0.05;
         // SegmentPlane
-        int maxIterations = 40;
-        float distanceThreshold = 0.05;
+        int maxIterations = 140;
+        float distanceThreshold = 0.04;
         // Clustering
         float clusterTolerance = 0.05;
         int minsize = 10;
@@ -339,13 +340,13 @@ namespace pcl_process
         // 发布地面点云信息
         sensor_msgs::PointCloud2 ground_point_cloud;
         pcl::toROSMsg(*(segmentCloud.second), ground_point_cloud);
-        ground_point_cloud.header.frame_id = "ground_clouds";
+        ground_point_cloud.header.frame_id = "clouds_link_virtual";
         groundPublisher_.publish(ground_point_cloud);
 
         // 发布障碍物点云信息
         sensor_msgs::PointCloud2 obstacle_point_cloud;
         pcl::toROSMsg(*segmentCloud.first, obstacle_point_cloud);
-        obstacle_point_cloud.header.frame_id = "obstacle_clouds";
+        obstacle_point_cloud.header.frame_id = "clouds_link_virtual";
         obstaclePublisher_.publish(obstacle_point_cloud);
 
         //    renderPointCloud(viewer, segmentCloud.first, "obstCloud", Color(1, 0, 0));
@@ -356,14 +357,28 @@ namespace pcl_process
         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessorI->EuclideanClustering(segmentCloud.first,
                                                                                                               clusterTolerance,
                                                                                                               minsize, maxsize);
+        
+        showCloudsInPCL(inputCloud, filteredCloud, segmentCloud, cloudClusters); //在PCL中显示点云
+    }
+
+    void PointCloudSegment::showCloudsInPCL(
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, 
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr &filteredCloud,
+        const std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> &segmentCloud,
+        const std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &cloudClusters)
+    {
         int clusterId = 0;
         pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler(inputCloudI, 255, 255, 0); //输入的初始点云相关
         viewer->addPointCloud(inputCloudI, color_handler, "cloud");
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler3(filteredCloud, 0, 255, 0); 
+        viewer3->addPointCloud(filteredCloud, color_handler3, "filter");
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler4(segmentCloud.second, 0, 255, 255); //输入的初始点云相关
+        viewer4->addPointCloud(segmentCloud.second, color_handler4, "ground");
         for (pcl::PointCloud<pcl::PointXYZ>::Ptr cluster : cloudClusters)
         {
             viewer2->removePointCloud("cloud");
-            std::cout << "cluster size";
-            pointProcessorI->numPoints(cluster);                                                                 // 控制台显示点云尺寸
+            //std::cout << "cluster size";
+            //pointProcessorI->numPoints(cluster);                                                                 // 控制台显示点云尺寸
             pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler(cluster, 255, 255, 0); //输入的初始点云相关
             viewer2->addPointCloud(cluster, color_handler, "cloud");
             // 显示每类障碍物点云
@@ -377,6 +392,10 @@ namespace pcl_process
         viewer->removePointCloud("cloud");
         viewer->removeAllShapes();
         viewer2->removeAllShapes();
+        viewer3->removeAllShapes();
+        viewer3->removePointCloud("filter");
+        viewer4->removeAllShapes();
+        viewer4->removePointCloud("ground");
     }
 
     PointCloudSegment::PointCloudSegment(ros::NodeHandle nh)
@@ -416,29 +435,55 @@ namespace pcl_process
             nodeHandle_.advertise<sensor_msgs::PointCloud2>(groundPubTopicName, groundPubQueueSize, groundPubLatch);
         obstaclePublisher_ =
             nodeHandle_.advertise<sensor_msgs::PointCloud2>(obstacleTopicName, obstacleQueueSize, obstacleLatch);
+        imuPublisher_ =
+            nodeHandle_.advertise<sensor_msgs::Imu>("imu_data", 1, false);
 
         //初始化相机
-        camera.init();
+        camera.init();       
 
         //初始化viewer
         viewer = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("All Cloud"));
         viewer2 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Objects Only"));
+        viewer3 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Filted"));
+        viewer4 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Ground Plane"));
+        
 
         //声明一个XYZ类的点云处理对象
         ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();
-        rotation_estimator* temp;
-        Eigen::Vector3f eulerAngle(0,0,0);
+        //rotation_estimator* temp;
+        Eigen::Vector3f accelVector;
+        sensor_msgs::Imu imu;
         while (ros::ok())
         {
             //获取相机数据，包括点云指针和姿态角信息
-            //camera.updateNextFrame();
-            //inputCloudI = camera.getPointClouds();
-            if(1)//if ()
-                eulerAngle = camera.getPose(); //ZYX顺序(即RPY)的欧拉角
-                //std::cout<<"x:"<<eulerAngle[2]<<std::endl;
-            // 当相机帧数据中有点云信息和姿态角信息时才进行检测
-            if (inputCloudI)//inputCloudI&&temp->check_imu_is_supported()
-                cityBlock(pointProcessorI, inputCloudI, eulerAngle); //障碍物检测
+            camera.updateNextFrame();
+            inputCloudI = camera.getPointClouds();
+            accelVector = camera.getPose();
+
+            // 发布IMU数据
+            imu.header.stamp = ros::Time::now();
+            imu.header.frame_id = "clouds_link_virtual";
+            imu.linear_acceleration.x = accelVector.x();
+            imu.linear_acceleration.y = accelVector.y();
+            imu.linear_acceleration.z = accelVector.z();
+            imu.orientation.x = 0;
+            imu.orientation.y = 0;
+            imu.orientation.z = 0;
+            imu.orientation.w = 0;
+            imu.angular_velocity.x = 0;
+            imu.angular_velocity.y = 0;
+            imu.angular_velocity.z = 0;
+            imuPublisher_.publish(imu);
+
+            cityBlock(pointProcessorI, inputCloudI, accelVector);
+            // if(camera.isUpdated)       // 检测是否更新了点云数据
+            // {
+            //     camera.isUpdated = false;
+            //     accelVector = camera.getPose(); //直接获取相机测得的线性加速度
+            //     inputCloudI = camera.getPointClouds();
+            //     cityBlock(pointProcessorI, inputCloudI, accelVector);
+            // }
+
             ros::spinOnce();
         }
     }
