@@ -22,9 +22,7 @@ void ClusterPts<PointT>::clusterHelper(int ind, PtCdtr<PointT> cloud, std::vecto
             clusterHelper(nearest_id, cloud, cluster, tree);    //继续找其附近点，并加入集群
         }
     }
-
 }
-
 
 // 欧式聚类
 template<typename PointT>

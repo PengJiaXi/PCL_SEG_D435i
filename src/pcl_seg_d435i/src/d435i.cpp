@@ -62,8 +62,8 @@ void D435i::_pipeCallback(rs2::frame frame)
         accelVector.x() = accel_data.x;
         accelVector.y() = accel_data.y;
         accelVector.z() = accel_data.z;
-        std::cout << "accel: "
-                  << "x:" << accelVector.x() << "y:" << accelVector.y() << "z:" << accelVector.z() << std::endl;
+        // std::cout << "accel: "
+        //           << "x:" << accelVector.x() << "y:" << accelVector.y() << "z:" << accelVector.z() << std::endl;
         // Call function that computes the angle of motion based on the retrieved measures
         //theta=algo.process_accel(accel_data);
     }

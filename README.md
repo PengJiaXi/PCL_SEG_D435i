@@ -21,3 +21,8 @@ V2.0-P 大修改
 4. 通过在test_d435i_camera.urdf文件中加入虚拟Link和姿态变换，解决了点云位置不对的问题，其原因是Ros坐标系和Realsense坐标系的姿态不一样，
    注意：以后在Rviz显示的东西，全部都发布到 clouds_link_virtual 这一帧上即可 (令frame_id = "clouds_link_virtual");
 5. 把PCLViewer的测试显示方式全部整合到了一个函数中，方便注释掉
+
+V2.1-G  
+1.添加了rviz的显示矩形框的方式;  
+2.修改了欧式聚类的最大和最小size和体素大小;  
+3.矩形框不再将质心距离地面过高的聚类框出。

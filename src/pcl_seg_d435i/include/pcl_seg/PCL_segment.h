@@ -13,6 +13,8 @@
 #include "pcl_seg/d435i.h"
 #include "pcl_seg/processPointClouds.h"
 #include <pcl/visualization/cloud_viewer.h>
+#include <visualization_msgs/Marker.h>
+#include <pcl/features/moment_of_inertia_estimation.h>
 
 using namespace lidar_obstacle_detection;
 
@@ -35,6 +37,7 @@ namespace pcl_process
         ros::Publisher groundPublisher_;
         ros::Publisher obstaclePublisher_;
         ros::Publisher imuPublisher_;
+        ros::Publisher boxPublisher_;
 
         //！camera
         CameraModel camera;
@@ -53,8 +56,9 @@ namespace pcl_process
         //! 初始化任务
         void init();
         void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int clusterId, pcl::visualization::PCLVisualizer::Ptr &viewer);
-        // void ros_Box(ros::NodeHandle nh,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId);
+        void ros_Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId);
         void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3f pose_data);
+        void showCloudsInROS(const std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &cloudClusters);
         void showCloudsInPCL(
             const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, 
             const pcl::PointCloud<pcl::PointXYZ>::Ptr &filteredCloud,
