@@ -56,6 +56,7 @@ namespace pcl_process
 
         //! 初始化任务
         void init();
+        void MyGetOBB (pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointXYZ& min_point, pcl::PointXYZ& max_point, pcl::PointXYZ& position, Eigen::Matrix3f& rotational_matrix) const;
         void Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int clusterId, pcl::visualization::PCLVisualizer::Ptr &viewer);
         void ros_Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId);
         void cityBlock(ProcessPointClouds<pcl::PointXYZ> *pointProcessorI, const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, Eigen::Vector3f pose_data);
