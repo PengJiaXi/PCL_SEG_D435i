@@ -31,77 +31,77 @@ using namespace lidar_obstacle_detection;
 //boost::shared_ptr<pcl::visualization::PCLVisualizer> Viewers(new pcl::visualization::PCLVisualizer("viewer"));
 namespace pcl_process
 {
-        void PointCloudSegment::ros_Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,int clusterId)
+    void PointCloudSegment::ros_Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int clusterId)
+    {
+        pcl::MomentOfInertiaEstimation<pcl::PointXYZ> feature_extractor;
+        feature_extractor.setInputCloud(cloud);
+        feature_extractor.compute();
+        //声明一些必要的变量
+        std::vector<float> moment_of_inertia;
+        std::vector<float> eccentricity;
+        pcl::PointXYZ min_point_OBB;
+        pcl::PointXYZ max_point_OBB;
+        pcl::PointXYZ position_OBB;
+        Eigen::Matrix3f rotational_matrix_OBB;
+        float major_value, middle_value, minor_value;
+        Eigen::Vector3f major_vector, middle_vector, minor_vector;
+        Eigen::Vector3f mass_center;
+        //计算描述符和其他的特征
+        feature_extractor.getMomentOfInertia(moment_of_inertia);
+        feature_extractor.getEccentricity(eccentricity);
+        feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+        feature_extractor.getEigenValues(major_value, middle_value, minor_value);
+        feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
+        feature_extractor.getMassCenter(mass_center);
+        Eigen::Vector3f position(position_OBB.x, position_OBB.y, position_OBB.z);
+        Eigen::Quaternionf quat(rotational_matrix_OBB);
+        // //中心的坐标
+        // pcl::PointXYZ center (mass_center (0), mass_center (1), mass_center (2));
+        // pcl::PointXYZ x_axis (major_vector (0) + mass_center (0), major_vector (1) + mass_center (1), major_vector (2) + mass_center (2));
+        // pcl::PointXYZ y_axis (middle_vector (0) + mass_center (0), middle_vector (1) + mass_center (1), middle_vector (2) + mass_center (2));
+        // pcl::PointXYZ z_ais (minor_vector (0) + mass_center (0), minor_vector (1) + mass_center (1), minor_vector (2) + mass_center (2));
+        // if (mass_center(2) < 1.0)
+        std::cout<<mass_center(2)<<std::endl;
         {
-            pcl::MomentOfInertiaEstimation <pcl::PointXYZ> feature_extractor;
-            feature_extractor.setInputCloud (cloud);
-            feature_extractor.compute ();
-            //声明一些必要的变量
-            std::vector <float> moment_of_inertia;
-            std::vector <float> eccentricity;
-            pcl::PointXYZ min_point_OBB;
-            pcl::PointXYZ max_point_OBB;
-            pcl::PointXYZ position_OBB;
-            Eigen::Matrix3f rotational_matrix_OBB;
-            float major_value, middle_value, minor_value;
-            Eigen::Vector3f major_vector, middle_vector, minor_vector;
-            Eigen::Vector3f mass_center;
-            //计算描述符和其他的特征
-            feature_extractor.getMomentOfInertia (moment_of_inertia);
-            feature_extractor.getEccentricity (eccentricity);
-            feature_extractor.getOBB (min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-            feature_extractor.getEigenValues (major_value, middle_value, minor_value);
-            feature_extractor.getEigenVectors (major_vector, middle_vector, minor_vector);
-            feature_extractor.getMassCenter (mass_center);
-            Eigen::Vector3f position (position_OBB.x, position_OBB.y, position_OBB.z);
-            Eigen::Quaternionf quat (rotational_matrix_OBB);
-            // //中心的坐标
-            // pcl::PointXYZ center (mass_center (0), mass_center (1), mass_center (2));
-            // pcl::PointXYZ x_axis (major_vector (0) + mass_center (0), major_vector (1) + mass_center (1), major_vector (2) + mass_center (2));
-            // pcl::PointXYZ y_axis (middle_vector (0) + mass_center (0), middle_vector (1) + mass_center (1), middle_vector (2) + mass_center (2));
-            // pcl::PointXYZ z_axis (minor_vector (0) + mass_center (0), minor_vector (1) + mass_center (1), minor_vector (2) + mass_center (2));
-            if(mass_center(2)<1.0)
-            {
-                //画线
-                visualization_msgs::Marker line_list;
-                line_list.header.frame_id = "clouds_link_virtual";
-                line_list.lifetime = ros::Duration(0.5);
-                line_list.ns = "lines";//+std::to_string(clusterId)
-                line_list.action = visualization_msgs::Marker::ADD;
-                line_list.pose.orientation.w = 1.0;
-                line_list.id = clusterId;
-                line_list.type = visualization_msgs::Marker::LINE_LIST;
-                line_list.scale.x = 0.01;
-                // Line list is red
-                line_list.color.r = 1.0;
-                line_list.color.a = 1.0;
+            //画线
+            visualization_msgs::Marker line_list;
+            line_list.header.frame_id = "clouds_link_virtual";
+            line_list.lifetime = ros::Duration(0.5);
+            line_list.ns = "lines"; //+std::to_string(clusterId)
+            line_list.action = visualization_msgs::Marker::ADD;
+            line_list.pose.orientation.w = 1.0;
+            line_list.id = clusterId;
+            line_list.type = visualization_msgs::Marker::LINE_LIST;
+            line_list.scale.x = 0.01;
+            // Line list is red
+            line_list.color.r = 1.0;
+            line_list.color.a = 1.0;
 
-                Eigen::Matrix<float,3,8> pv; //8个列向量组成矩阵，表示8个顶点坐标
-                pv << min_point_OBB.x, min_point_OBB.x,max_point_OBB.x,max_point_OBB.x,min_point_OBB.x,min_point_OBB.x,max_point_OBB.x, max_point_OBB.x,
-                    min_point_OBB.y,min_point_OBB.y,min_point_OBB.y,min_point_OBB.y,max_point_OBB.y, max_point_OBB.y,max_point_OBB.y, max_point_OBB.y,
-                    min_point_OBB.z,max_point_OBB.z, max_point_OBB.z, min_point_OBB.z,min_point_OBB.z,max_point_OBB.z,max_point_OBB.z, min_point_OBB.z;
-                Eigen::Matrix<float, 1, 8> one;//1*8的单位行向量
-                one<<1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0;
-                pv=rotational_matrix_OBB *pv+ position*one ;  //计算旋转矩阵和质心平移后的真实坐标
-                                    
-                geometry_msgs::Point p[8];//ros中Marker的8个顶点
-                for(int i=0;i<8;i++)
-                {
-                    p[i].x=pv(0,i);
-                    p[i].y=pv(1,i);
-                    p[i].z=pv(2,i);
-                }
-                const int order[24]={0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,4,0,5,1,6,2,7,3};
-                for(int i=0;i<24;i++)
-                {
-                    line_list.points.push_back(p[order[i]]);
-                }
-                line_list.header.stamp = ros::Time::now();
-                boxPublisher_.publish(line_list);
-                ros::spinOnce();
+            Eigen::Matrix<float, 3, 8> pv; //8个列向量组成矩阵，表示8个顶点坐标
+            pv << min_point_OBB.x, min_point_OBB.x, max_point_OBB.x, max_point_OBB.x, min_point_OBB.x, min_point_OBB.x, max_point_OBB.x, max_point_OBB.x,
+                min_point_OBB.y, min_point_OBB.y, min_point_OBB.y, min_point_OBB.y, max_point_OBB.y, max_point_OBB.y, max_point_OBB.y, max_point_OBB.y,
+                min_point_OBB.z, max_point_OBB.z, max_point_OBB.z, min_point_OBB.z, min_point_OBB.z, max_point_OBB.z, max_point_OBB.z, min_point_OBB.z;
+            Eigen::Matrix<float, 1, 8> one; //1*8的单位行向量
+            one << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+            pv = rotational_matrix_OBB * pv + position * one; //计算旋转矩阵和质心平移后的真实坐标
+
+            geometry_msgs::Point p[8]; //ros中Marker的8个顶点
+            for (int i = 0; i < 8; i++)
+            {
+                p[i].x = pv(0, i);
+                p[i].y = pv(1, i);
+                p[i].z = pv(2, i);
             }
-            
+            const int order[24] = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 4, 0, 5, 1, 6, 2, 7, 3};
+            for (int i = 0; i < 24; i++)
+            {
+                line_list.points.push_back(p[order[i]]);
+            }
+            line_list.header.stamp = ros::Time::now();
+            boxPublisher_.publish(line_list);
+            ros::spinOnce();
         }
+    }
     void PointCloudSegment::Box(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int clusterId, pcl::visualization::PCLVisualizer::Ptr &viewer)
     {
         // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -217,14 +217,25 @@ namespace pcl_process
 
         // Setting hyper parameters
 
-        float voxelsize = 0.03;
+        // 粗粒度参数
+        float voxelsize = 0.04;
         // SegmentPlane
-        int maxIterations = 140;
-        float distanceThreshold = 0.04;
+        int maxIterations = 100;
+        float distanceThreshold = 0.03;
         // Clustering
-        float clusterTolerance = 0.05;
-        int minsize = 5;
-        int maxsize = 100;
+        float clusterTolerance = 0.06;
+        int minsize = 10;
+        int maxsize = 1000;
+
+        // 细粒度参数，必须固定相机
+        // float voxelsize = 0.01;
+        // // SegmentPlane
+        // int maxIterations = 100;
+        // float distanceThreshold = 0.01;
+        // // Clustering
+        // float clusterTolerance = 0.01;
+        // int minsize = 4;
+        // int maxsize = 1000;
 
         // First:Filter cloud to reduce amount of points
         // 过滤点云，保留指定感兴趣立方体内的点，并去除自身车顶的点
@@ -234,7 +245,7 @@ namespace pcl_process
         // 执行Ransac，获得一对数据，first为地面外的点，second为地面内的点
         // std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = pointProcessorI->RansacSegmentPlane(
         //     filteredCloud, maxIterations, distanceThreshold);
-        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud = 
+        std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> segmentCloud =
             pointProcessorI->RansacSegmentPlaneWithPose(filteredCloud, maxIterations, distanceThreshold, pose_data);
 
         // 发布地面点云信息
@@ -249,6 +260,12 @@ namespace pcl_process
         obstacle_point_cloud.header.frame_id = "clouds_link_virtual";
         obstaclePublisher_.publish(obstacle_point_cloud);
 
+        //原始点云
+        sensor_msgs::PointCloud2 origin_point_cloud;
+        pcl::toROSMsg(*inputCloudI, origin_point_cloud);
+        origin_point_cloud.header.frame_id = "clouds_link_virtual";
+        originPublisher_.publish(origin_point_cloud);
+
         //    renderPointCloud(viewer, segmentCloud.first, "obstCloud", Color(1, 0, 0));
         //    renderPointCloud(viewer,inputCloud,"inputCloud");
 
@@ -257,10 +274,11 @@ namespace pcl_process
         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = pointProcessorI->EuclideanClustering(segmentCloud.first,
                                                                                                               clusterTolerance,
                                                                                                               minsize, maxsize);
-        
-        showCloudsInPCL(inputCloud, filteredCloud, segmentCloud, cloudClusters); //在PCL中显示点云
+
+        //showCloudsInPCL(inputCloud, filteredCloud, segmentCloud, cloudClusters); //在PCL中显示点云
         showCloudsInROS(cloudClusters);
     }
+
     void PointCloudSegment::showCloudsInROS(const std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &cloudClusters)
     {
         int clusterId = 0;
@@ -269,7 +287,7 @@ namespace pcl_process
             pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler(cluster, 255, 255, 0); //输入的初始点云相关
             // Fourth: Find bounding boxes for each obstacle cluster
             // 绘制边界框
-            ros_Box(cluster,clusterId);
+            ros_Box(cluster, clusterId);
             ++clusterId;
         }
         // line_list.action=visualization_msgs::Marker::DELETEALL;
@@ -278,15 +296,21 @@ namespace pcl_process
     }
 
     void PointCloudSegment::showCloudsInPCL(
-        const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud, 
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr &inputCloud,
         const pcl::PointCloud<pcl::PointXYZ>::Ptr &filteredCloud,
         const std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> &segmentCloud,
         const std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> &cloudClusters)
     {
+        //初始化viewer
+        viewer = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("All Cloud"));
+        viewer2 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Objects Only"));
+        viewer3 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Filted"));
+        viewer4 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Ground Plane"));
+
         int clusterId = 0;
         pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler(inputCloudI, 255, 255, 0); //输入的初始点云相关
         viewer->addPointCloud(inputCloudI, color_handler, "cloud");
-        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler3(filteredCloud, 0, 255, 0); 
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler3(filteredCloud, 0, 255, 0);
         viewer3->addPointCloud(filteredCloud, color_handler3, "filter");
         pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_handler4(segmentCloud.second, 0, 255, 255); //输入的初始点云相关
         viewer4->addPointCloud(segmentCloud.second, color_handler4, "ground");
@@ -352,15 +376,11 @@ namespace pcl_process
         imuPublisher_ =
             nodeHandle_.advertise<sensor_msgs::Imu>("imu_data", 1, false);
         boxPublisher_ =
-                nodeHandle_.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+            nodeHandle_.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+        originPublisher_ = 
+            nodeHandle_.advertise<sensor_msgs::PointCloud2>("origin_points", 1, false);
         //初始化相机
-        camera.init();       
-
-        //初始化viewer
-        viewer = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("All Cloud"));
-        viewer2 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Objects Only"));
-        viewer3 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Filted"));
-        viewer4 = pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer("Ground Plane"));
+        camera.init();
 
         //声明一个XYZ类的点云处理对象
         ProcessPointClouds<pcl::PointXYZ> *pointProcessorI = new ProcessPointClouds<pcl::PointXYZ>();

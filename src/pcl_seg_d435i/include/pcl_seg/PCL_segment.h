@@ -36,6 +36,7 @@ namespace pcl_process
         ros::NodeHandle nodeHandle_;
         ros::Publisher groundPublisher_;
         ros::Publisher obstaclePublisher_;
+        ros::Publisher originPublisher_;
         ros::Publisher imuPublisher_;
         ros::Publisher boxPublisher_;
 

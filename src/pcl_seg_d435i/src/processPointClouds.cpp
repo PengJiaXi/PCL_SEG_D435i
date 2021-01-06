@@ -102,6 +102,7 @@ PtCdtr<PointT> ProcessPointClouds<PointT>::FilterCloud(PtCdtr<PointT> cloud, flo
     PtCdtr<PointT> cloudFiltered(new pcl::PointCloud<PointT>);
     vg.setInputCloud(cloud);
     vg.setLeafSize(voxelsize, voxelsize, voxelsize);    //设置体素网格大小，越大则采样数越少
+    std::cout<<"cloud size: "<<cloud->points.size()<<std::endl;
     vg.filter(*cloudFiltered);          //滤波
 
     //显示时间消耗
